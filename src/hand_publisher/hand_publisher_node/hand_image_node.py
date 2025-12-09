@@ -1,0 +1,74 @@
+from . import config
+import cv2
+import rclpy
+from rclpy.node import Node
+import numpy as np
+
+from hand_publisher_interfaces.msg import Image
+
+Seconds = int
+
+
+class ImagePublisherNode(Node):
+
+    def __init__(
+        self,
+        node_name: str = "image_publisher",
+        topic: str = "webcam",
+        src: str | int = 0,
+    ):
+        super().__init__(node_name=node_name)
+        self.publisher_ = self.create_publisher(Image, topic=topic, qos_profile=10)
+        timer_period: Seconds = 0.1
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.cap = cv2.VideoCapture(src)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.IMAGE_SIZE[0])
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.IMAGE_SIZE[1])
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # might be ignored by some backends
+
+    def timer_callback(self):
+        msg = Image()
+        ok, img = self.cap.read()
+        if not ok:
+            return
+        img = cv2.flip(img, 1)
+
+        self.get_logger().info(
+            'Data type: "%s"/"%s" Max: "%s" Min: "%s" Shape: "%s"'
+            % (type(img), img.dtype, np.max(img), np.min(img), img.shape)
+        )
+        msg.height = img.shape[0]
+        msg.width = img.shape[1]
+        msg.channels = img.shape[2]
+        msg.image = img.reshape(-1)
+        self.publisher_.publish(msg)
+
+    def destroy_node(self):
+        super().destroy_node()
+        self.cap.release()
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    config.init_caps()
+    image_publisher_node = ImagePublisherNode(node_name="hand_publisher_node")
+    rclpy.spin(image_publisher_node)
+    # ensure explicitly the calling of cap release
+    image_publisher_node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+
+# TODO: another node
+# win_name = f"Debug source {src}"
+# frame_id = 0
+# while not stop_event.is_set():
+#     cv2.imshow(win_name, img)
+#     key = cv2.waitKey(1) & 0xFF
+#     if key == ord('q'):
+#         break
+# cap.release()
+# if debug:
+#     cv2.destroyWindow(win_name)
