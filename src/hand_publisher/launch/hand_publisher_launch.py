@@ -16,11 +16,12 @@ def generate_launch_description():
                 # optional: be explicit
                 remappings=[("robot_description", "/robot_description")],
             ),
-            Node(
-                package="joint_state_publisher",
-                executable="joint_state_publisher",
-                remappings=[("robot_description", "/robot_description")],
-            ),
+            # replaced programmatically now
+            # Node(
+            #     package="joint_state_publisher",
+            #     executable="joint_state_publisher",
+            #     remappings=[("robot_description", "/robot_description")],
+            # ),
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
@@ -69,6 +70,13 @@ def generate_launch_description():
                 namespace="hand_publisher",
                 executable="hand_frame_node",
                 name="hand_frame",
+                prefix="/home/hartvi/miniconda3/bin/python",
+            ),
+            Node(
+                package="hand_publisher",
+                namespace="hand_publisher",
+                executable="controller_node",
+                name="controller",
                 prefix="/home/hartvi/miniconda3/bin/python",
             ),
         ]

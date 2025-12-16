@@ -37,6 +37,7 @@ setup(
             "hand_image_node=hand_publisher_node.hand_image_node:main",
             "hand_points_node=hand_publisher_node.hand_points_node:main",
             "hand_frame_node=hand_publisher_node.hand_frame_node:main",
+            "controller_node=hand_publisher_node.controller_node:main",
         ],
     },
 )
