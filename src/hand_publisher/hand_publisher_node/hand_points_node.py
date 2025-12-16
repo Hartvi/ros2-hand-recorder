@@ -4,14 +4,27 @@ import rclpy
 
 from . import config
 from hand_publisher_interfaces.msg import Image, HandPoints
-from geometry_msgs.msg import Point
 from rclpy.node import Node
+
+from typing import TYPE_CHECKING
 
 
 class Landmark:
     x: float
     y: float
     z: float
+
+
+if TYPE_CHECKING:
+
+    class Image:
+        height: int
+        width: int
+        channels: int
+        image: list
+
+    class HandPoints:
+        points: list[float]
 
 
 class HandPointsNode(Node):
@@ -57,12 +70,12 @@ class HandPointsNode(Node):
             # assert len(hand_marks) == config.NUM_HANDS_PER_SRC, f"{len(hand_marks)=}!={config.NUM_HANDS_PER_SRC=}"
             hand_points = [list(handLms.landmark) for handLms in hand_marks]
             landmarks = self.landmarks_to_handpoints(hand_points)
-            self.get_logger().info('Hand points: "%s"' % str(len(landmarks)))
-            msg = HandPoints()
-            msg.points = landmarks
-            self.publisher_.publish(msg)
+            self.get_logger().debug('Hand points: "%s"' % str(len(landmarks)))
+            msg_hand = HandPoints()
+            msg_hand.points = landmarks
+            self.publisher_.publish(msg_hand)
         else:
-            self.get_logger().info(
+            self.get_logger().debug(
                 'No hands! Image shape: "%s,%s,%s"'
                 % (msg.height, msg.width, msg.channels)
             )

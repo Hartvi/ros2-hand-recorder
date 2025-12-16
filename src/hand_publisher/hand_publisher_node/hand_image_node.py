@@ -33,7 +33,7 @@ class ImagePublisherNode(Node):
             return
         img = cv2.flip(img, 1)
 
-        self.get_logger().info(
+        self.get_logger().debug(
             'Data type: "%s"/"%s" Max: "%s" Min: "%s" Shape: "%s"'
             % (type(img), img.dtype, np.max(img), np.min(img), img.shape)
         )

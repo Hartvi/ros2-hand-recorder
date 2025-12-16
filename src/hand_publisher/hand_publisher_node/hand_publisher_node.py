@@ -16,7 +16,7 @@ class HandPublisherNode(Node):
         self,
         node_name: str = "hand_publisher_node",
         topic: str = "hand_points",
-        base_frame: str = "base_link",
+        base_frame: str = "world",
     ):
         super().__init__(node_name=node_name)
         self.subscription = self.create_subscription(
@@ -29,24 +29,35 @@ class HandPublisherNode(Node):
 
         # Publisher for RViz markers
         self.marker_pub = self.create_publisher(Marker, "hand_points_marker", 10)
+        self.corrected_point_pub = self.create_publisher(
+            HandPoints, "hand_points_corrected", 10
+        )
         self.base_frame = base_frame
 
         self.old_points = np.zeros((21, 3))
 
     def listener_callback(self, msg: HandPoints):
-        # self.get_logger().info('Hand points: "%s"' % str(msg))
         hand_points = np.array(msg.points).reshape(21, 3, copy=False)
         dist = self.mix_in_distance(hand_points)
         self.normalize_hand(hand_points, dist)
-        self.get_logger().info('Hand points: "%s"' % str(dist))
+        # self.get_logger().info('Hand points: "%s"' % str(dist))
 
         # Publish visualization marker in base_frame
-        self.publish_marker(self.lerp(0.2, hand_points, self.old_points))
+        low_pass_points = self.lerp(0.2, hand_points, self.old_points)
+        # self.get_logger().info(
+        #     "thumb & index dist: %f"
+        #     % np.linalg.norm(low_pass_points[8] - low_pass_points[4])
+        # )
+        hand_point_msg = HandPoints()
+        hand_point_msg.points = low_pass_points.flat
+        self.corrected_point_pub.publish(hand_point_msg)
+        self.publish_marker(low_pass_points)
         self.old_points = hand_points
 
     @staticmethod
     def normalize_hand(
-        points_21_3: np.ndarray, dist: float, random_const: float = 10.0
+        points_21_3: np.ndarray,
+        dist: float,
     ):
         points_21_3[:, :2] -= 0.5
         points_21_3[:, :2] *= dist
