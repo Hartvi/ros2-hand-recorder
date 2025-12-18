@@ -28,6 +28,13 @@ ros2 topic pub --once /mesh_test visualization_msgs/msg/Marker "{
 }"
 ```
 
+
+just IK:
+`sudo apt install ros-${ROS_DISTRO}-trac-ik`
+
+
 moveit:
-sudo apt install ros-${ROS_DISTRO}-moveit
-ros2 interface show moveit_msgs/srv/GetPositionIK
+`sudo apt install ros-${ROS_DISTRO}-moveit`
+`ros2 interface show moveit_msgs/srv/GetPositionIK`
+python bindings:
+`sudo apt install ros-jazzy-moveit-py`

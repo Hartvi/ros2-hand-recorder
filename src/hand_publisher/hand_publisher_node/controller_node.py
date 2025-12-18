@@ -1,7 +1,13 @@
 import math
+import numpy as np
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import JointState
+from geometry_msgs.msg import PoseStamped
+
+from tf2_ros import TransformException
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+from geometry_msgs.msg import Pose
 
 JOINTS = [f"Actuator{i}" for i in range(1, 8)]
 
@@ -9,17 +15,46 @@ JOINTS = [f"Actuator{i}" for i in range(1, 8)]
 class ControllerNode(Node):
     def __init__(self):
         super().__init__("joint_state_wave")
-        self.pub = self.create_publisher(JointState, "/joint_states", 10)
+        self.pub = self.create_publisher(Pose, "/ik_target", 10)
         self.t = 0.0
-        self.timer = self.create_timer(0.02, self.tick)  # 50 Hz
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
-    def tick(self):
-        msg = JointState()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.name = JOINTS
-        msg.position = [0.4 * math.sin(self.t + i * 0.3) for i in range(len(JOINTS))]
-        self.pub.publish(msg)
-        self.t += 0.02
+        self.timer = self.create_timer(0.1, self.lookup_transform)
+
+        # self.moveit = MoveItPy(node_name="ik_node")  # MoveItPy wraps its own node
+        # self.robot_state = RobotState(self.moveit.get_robot_model())
+        self.group_name = "arm"
+
+    def lookup_transform(self):
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                target_frame="world", source_frame="hand_frame", time=rclpy.time.Time()
+            )
+
+            translation = transform.transform.translation
+            # rotation = transform.transform.rotation
+
+            self.get_logger().debug(
+                f"hand_frame in world: "
+                f"x={translation.x:.3f}, y={translation.y:.3f}, z={translation.z:.3f}"
+            )
+
+            target_pose = self.pose_from_transform(transform)
+            self.pub.publish(target_pose)
+
+        except TransformException as ex:
+            self.get_logger().warn(f"TF lookup failed: {ex}")
+
+    def pose_from_transform(self, transform_stamped) -> Pose:
+        t = transform_stamped.transform.translation
+        q = transform_stamped.transform.rotation
+        pose = Pose()
+        pose.position.x = t.x
+        pose.position.y = t.y
+        pose.position.z = t.z
+        pose.orientation = q
+        return pose
 
 
 def main(args=None):

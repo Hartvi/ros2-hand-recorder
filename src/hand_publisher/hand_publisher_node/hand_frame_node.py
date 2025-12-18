@@ -4,6 +4,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 from hand_publisher_interfaces.msg import HandPoints
+
 from .hand_utils import hand_to_pose
 
 
@@ -46,7 +47,7 @@ class HandFrameNode(Node):
         msg.transform.rotation.z = qz
         msg.transform.rotation.w = qw
 
-        self.get_logger().info('Hand points: "%s"' % str(msg))
+        self.get_logger().debug('Hand points: "%s"' % str(msg))
         self.br.sendTransform(msg)
 
 
@@ -56,7 +57,3 @@ def main():
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
-
-
-if __name__ == "__main__":
-    main()
