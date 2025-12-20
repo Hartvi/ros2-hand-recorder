@@ -80,17 +80,17 @@ def generate_launch_description():
                 prefix="/home/hartvi/miniconda3/bin/python",
             ),
             # --- IK node (C++) ---
-            # Node(
-            #     package="ik_node",
-            #     executable="trac_ik_node",
-            #     name="trac_ik",
-            #     output="screen",
-            #     parameters=[
-            #         {"base_link": "base_link"},
-            #         {"tip_link": "end_effector_link"},
-            #         {"timeout": 0.02},
-            #         {"eps": 1e-5},
-            #     ],
-            # ),
+            Node(
+                package="ik_node",
+                executable="trac_ik_node",
+                name="trac_ik",
+                output="screen",
+                parameters=[
+                    {"base_link": "base_link"},
+                    {"tip_link": "end_effector_link"},
+                    {"timeout": 0.02},
+                    {"eps": 1e-5},
+                ],
+            ),
         ]
     )
