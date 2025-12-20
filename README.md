@@ -7,6 +7,8 @@ To launch rviz2:
 
 
 ### TODOs
+- set camera transform
+- automatically detect finger & hand points to align with urdf gripper/ee pose
 - fix hand transform
 - save data
 - create data set scene
