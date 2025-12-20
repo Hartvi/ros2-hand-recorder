@@ -130,9 +130,6 @@ private:
     if (rc < 0) {
       RCLCPP_WARN(get_logger(), "IK failed (rc=%d). Try different pose/seed/timeout.", rc);
       return;
-    }else{
-
-      RCLCPP_INFO(get_logger(), "IK SUCCEEDED");
     }
 
     // Publish as JointState (names are not provided by TRAC-IK here, so we publish positions only).

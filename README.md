@@ -7,11 +7,15 @@ To launch rviz2:
 
 
 ### TODOs
-- get position and dir from hand points
-- visualize robotics arm URDFs
-- inverse kinematics on robot arm from pose or just position
+- fix hand transform
 - save data
 - create data set scene
+
+
+### DONE
+- get position and dir from hand points - DONE
+- visualize robotics arm URDFs - DONE
+- inverse kinematics on robot arm from pose or just position - DONE
 
 diagnose meshes:
 ```
