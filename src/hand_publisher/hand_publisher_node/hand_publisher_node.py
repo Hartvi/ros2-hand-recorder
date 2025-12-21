@@ -9,6 +9,11 @@ from hand_publisher_interfaces.msg import HandPoints
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
 
+from tf2_ros import TransformException
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+from scipy.spatial.transform import Rotation as R
+
 
 class HandPublisherNode(Node):
 
@@ -35,6 +40,9 @@ class HandPublisherNode(Node):
         self.base_frame = base_frame
 
         self.old_points = np.zeros((21, 3))
+
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
     def listener_callback(self, msg: HandPoints):
         hand_points = np.array(msg.points).reshape(21, 3, copy=False)
@@ -95,6 +103,19 @@ class HandPublisherNode(Node):
             return lerp * arr1 + (1.0 - lerp) * arr2
         return arr2
 
+    def lookup_transform(self):
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                target_frame="world",
+                source_frame="camera_frame",
+                time=rclpy.time.Time(),
+            )
+
+            return transform
+
+        except TransformException as ex:
+            self.get_logger().warn(f"TF lookup failed: {ex}")
+
     def publish_marker(self, hand_points: np.ndarray):
         marker = Marker()
         marker.header.frame_id = self.base_frame
@@ -119,15 +140,26 @@ class HandPublisherNode(Node):
         marker.color.g = 1.0
         marker.color.b = 0.0
 
-        # Add all 21 points
-        for p in hand_points:
-            pt = Point()
-            pt.x = float(p[0])
-            pt.y = float(p[1])
-            pt.z = float(p[2])
-            marker.points.append(pt)
-
-        self.marker_pub.publish(marker)
+        transform = self.lookup_transform()
+        if transform:
+            translation = transform.transform.translation
+            rotation = transform.transform.rotation
+            self.get_logger().info('translation: "%s"' % str(translation))
+            self.get_logger().info('rotation: "%s"' % str(rotation))
+            rot = R.from_quat(
+                [rotation.w, rotation.x, rotation.y, rotation.z]
+            ).as_matrix()
+            # Add all 21 points
+            hand_points = hand_points @ rot + np.array(
+                [translation.x, translation.y, translation.z]
+            )
+            for p in hand_points:
+                pt = Point()
+                pt.x = float(p[0])
+                pt.y = float(p[1])
+                pt.z = float(p[2])
+                marker.points.append(pt)
+            self.marker_pub.publish(marker)
 
 
 def main(args=None):

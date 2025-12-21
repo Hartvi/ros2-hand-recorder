@@ -6,7 +6,7 @@ import numpy as np
 
 from hand_publisher_interfaces.msg import Image
 
-Seconds = int
+Seconds = float
 
 
 class ImagePublisherNode(Node):

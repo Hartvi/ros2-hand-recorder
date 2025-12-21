@@ -7,7 +7,6 @@ from geometry_msgs.msg import PoseStamped
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-from geometry_msgs.msg import PoseStamped
 
 JOINTS = [f"Actuator{i}" for i in range(1, 8)]
 
@@ -31,14 +30,6 @@ class ControllerNode(Node):
                 source_frame="hand_frame",
                 time=rclpy.time.Time(),
             )
-
-            # translation = transform.transform.translation
-            # # rotation = transform.transform.rotation
-
-            # self.get_logger().debug(
-            #     f"hand_frame in world: "
-            #     f"x={translation.x:.3f}, y={translation.y:.3f}, z={translation.z:.3f}"
-            # )
 
             target_pose = self.pose_from_transform(transform)
             self.pub.publish(target_pose)

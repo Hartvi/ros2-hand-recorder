@@ -27,12 +27,30 @@ class HandFrameNode(Node):
         )
         self.static_br = StaticTransformBroadcaster(self)
         self.publish_hand_correction()
+        self.publish_camera_pos()
         self.subscription  # prevent unused variable warning
         self.base_frame = base_frame
 
     def listener_callback(self, msg_in: HandPoints):
         stamp = self.get_clock().now().to_msg()
         self.raw_hand_frame(msg_in, stamp)
+
+    def publish_camera_pos(self):
+        msg = TransformStamped()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "world"
+        msg.child_frame_id = "camera_frame"
+
+        # TODO: set smartly somehow
+        x, y, z, w = R.from_rotvec([0, np.pi / 2, 0]).as_quat()
+        msg.transform.translation.x = -0.6
+        msg.transform.translation.y = 0.0
+        msg.transform.translation.z = 1.0
+        msg.transform.rotation.x = float(x)
+        msg.transform.rotation.y = float(y)
+        msg.transform.rotation.z = float(z)
+        msg.transform.rotation.w = float(w)
+        self.static_br.sendTransform(msg)
 
     def publish_hand_correction(self):
         msg = TransformStamped()
@@ -56,7 +74,7 @@ class HandFrameNode(Node):
 
         msg = TransformStamped()
         msg.header.stamp = stamp
-        msg.header.frame_id = "world"
+        msg.header.frame_id = "camera_frame"
         msg.child_frame_id = "raw_hand_frame"
 
         R_rot, t = hand_to_pose(hand_points)
