@@ -90,6 +90,7 @@ def generate_launch_description():
                 executable="controller_node",
                 name="controller",
                 prefix="/home/hartvi/miniconda3/bin/python",
+                parameters=[{"base_link": base_link}],
             ),
             Node(
                 package="ik_node",

@@ -22,11 +22,15 @@ class ControllerNode(Node):
         self.timer = self.create_timer(0.1, self.lookup_transform)
 
         self.group_name = "arm"
+        self.declare_parameter("base_link", "base_link")
+        self.base_link = (
+            self.get_parameter("base_link").get_parameter_value().string_value
+        )
 
     def lookup_transform(self):
         try:
             transform = self.tf_buffer.lookup_transform(
-                target_frame="base_link",
+                target_frame=self.base_link,
                 source_frame="hand_frame",
                 time=rclpy.time.Time(),
             )
@@ -46,7 +50,7 @@ class ControllerNode(Node):
         pose.position.y = t.y
         pose.position.z = t.z
         pose.orientation = q
-        pose_stamped.header.frame_id = "base_link"
+        pose_stamped.header.frame_id = self.base_link
         return pose_stamped
 
 
