@@ -144,13 +144,13 @@ class HandPublisherNode(Node):
         if transform:
             translation = transform.transform.translation
             rotation = transform.transform.rotation
-            self.get_logger().info('translation: "%s"' % str(translation))
-            self.get_logger().info('rotation: "%s"' % str(rotation))
+            # self.get_logger().info('translation: "%s"' % str(translation))
+            # self.get_logger().info('rotation: "%s"' % str(rotation))
             rot = R.from_quat(
-                [rotation.w, rotation.x, rotation.y, rotation.z]
+                [rotation.x, rotation.y, rotation.z, rotation.w]
             ).as_matrix()
             # Add all 21 points
-            hand_points = hand_points @ rot + np.array(
+            hand_points = (rot @ hand_points.T).T + np.array(
                 [translation.x, translation.y, translation.z]
             )
             for p in hand_points:

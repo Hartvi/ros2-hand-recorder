@@ -9,15 +9,23 @@ cwd = Path(__file__).parent.resolve()
 
 
 def bash(cmd: str):
+    print("RUNNING:", cmd)
     return subprocess.run(
-        ["bash", "-c", "source /opt/ros/${ROS_DISTRO}/setup.bash && "+cmd], cwd=cwd)
+        ["bash", "-c", "source /opt/ros/${ROS_DISTRO}/setup.bash && " + cmd], cwd=cwd
+    )
 
 
 args = sys.argv[1:]
 
 clean = "clean" in args
+if "clean" in args:
+    args.remove("clean")
 build = "build" in args
+if "build" in args:
+    args.remove("build")
 run = "run" in args
+if "run" in args:
+    args.remove("run")
 
 if clean:
     subprocess.run(["rm", "-r", "build"], cwd=cwd)
@@ -29,10 +37,10 @@ if build:
     print(output)
 
 if run:
-    bash("""
+    bash(
+        """
 source ./install/setup.bash &&
 unset GTK_PATH &&
-ros2 launch hand_publisher hand_publisher_launch.py
-""")
-
-
+ros2 launch hand_publisher hand_publisher_launch.py """
+        + (" ".join(args) if args else "")
+    )

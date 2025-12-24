@@ -42,10 +42,12 @@ class HandFrameNode(Node):
         msg.child_frame_id = "camera_frame"
 
         # TODO: set smartly somehow
-        x, y, z, w = R.from_rotvec([0, np.pi / 2, 0]).as_quat()
+        x, y, z, w = R.from_euler(
+            "XYZ", [0, np.pi / 2, -np.pi / 2], degrees=False
+        ).as_quat()
         msg.transform.translation.x = -0.6
         msg.transform.translation.y = 0.0
-        msg.transform.translation.z = 1.0
+        msg.transform.translation.z = 0.4
         msg.transform.rotation.x = float(x)
         msg.transform.rotation.y = float(y)
         msg.transform.rotation.z = float(z)
@@ -59,7 +61,7 @@ class HandFrameNode(Node):
         msg.child_frame_id = "hand_frame"
 
         # TODO: set depending on the URDF that is present
-        x, y, z, w = R.from_rotvec([np.pi / 2, 0, 0]).as_quat()
+        x, y, z, w = R.from_euler("XYZ", [np.pi / 2, 0, np.pi], degrees=False).as_quat()
         msg.transform.translation.x = 0.0
         msg.transform.translation.y = 0.0
         msg.transform.translation.z = 0.0

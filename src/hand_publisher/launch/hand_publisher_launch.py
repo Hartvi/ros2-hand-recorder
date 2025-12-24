@@ -1,48 +1,60 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from pathlib import Path
+
+USE_RVIZ = "use_rviz"
 
 
 def generate_launch_description():
     pkg_share = Path(__file__).resolve().parent.parent
-    urdf_path = pkg_share / "urdf" / "gen3_7dof" / "urdf" / "GEN3_URDF_V12.urdf"
+    # TODO: add argument for urdf
+    # urdf_path = pkg_share / "urdf" / "gen3_7dof" / "urdf" / "GEN3_URDF_V12.urdf"
+    urdf_path = pkg_share / "urdf" / "robots" / "panda_arm.urdf"
+    use_rviz = LaunchConfiguration(USE_RVIZ)
+    base_link = LaunchConfiguration("base_link")
+    tip_link = LaunchConfiguration("tip_link")
 
     return LaunchDescription(
         [
+            DeclareLaunchArgument(
+                USE_RVIZ,
+                default_value="true",
+                description="Whether to launch RViz",
+            ),
+            DeclareLaunchArgument(
+                "robot",
+                default_value="panda",
+            ),
+            DeclareLaunchArgument(
+                "base_link",
+                default_value="base_link",
+            ),
+            DeclareLaunchArgument(
+                "tip_link",
+                default_value="end_effector_link",
+            ),
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 parameters=[{"robot_description": urdf_path.read_text()}],
                 # optional: be explicit
-                remappings=[("robot_description", "/robot_description")],
+                # remappings=[("robot_description", "/robot_description")],
             ),
-            # replaced programmatically now
-            # Node(
-            #     package="joint_state_publisher",
-            #     executable="joint_state_publisher",
-            #     remappings=[("robot_description", "/robot_description")],
-            # ),
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
                 name="world_to_base",
-                arguments=["0", "0", "0", "0", "0", "0", "world", "base_link"],
+                arguments=["0", "0", "0", "0", "0", "0", "world", base_link],
             ),
-            # RViz2
             Node(
                 package="rviz2",
                 executable="rviz2",
                 name="rviz2",
                 output="screen",
-                # arguments=[
-                #     "--ros-args",
-                #     "--log-level",
-                #     "rviz2:=debug",
-                #     "--log-level",
-                #     "rviz_rendering:=debug",
-                #     "--log-level",
-                #     "resource_retriever:=debug",
-                # ],
+                condition=IfCondition(use_rviz),
             ),
             Node(
                 package="hand_publisher",
@@ -79,17 +91,17 @@ def generate_launch_description():
                 name="controller",
                 prefix="/home/hartvi/miniconda3/bin/python",
             ),
-            # --- IK node (C++) ---
             Node(
                 package="ik_node",
                 executable="trac_ik_node",
                 name="trac_ik",
                 output="screen",
                 parameters=[
-                    {"base_link": "base_link"},
-                    {"tip_link": "end_effector_link"},
+                    {"base_link": base_link},
+                    {"tip_link": tip_link},
                     {"timeout": 0.02},
                     {"eps": 1e-5},
+                    {"robot_description": urdf_path.read_text()},
                 ],
             ),
         ]
