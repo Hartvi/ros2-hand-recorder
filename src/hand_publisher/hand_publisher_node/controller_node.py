@@ -8,12 +8,10 @@ from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
 
-JOINTS = [f"Actuator{i}" for i in range(1, 8)]
-
 
 class ControllerNode(Node):
     def __init__(self):
-        super().__init__("joint_state_wave")
+        super().__init__("controller_node")
         self.pub = self.create_publisher(PoseStamped, "/ik_target", 10)
         self.t = 0.0
         self.tf_buffer = Buffer()
