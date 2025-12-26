@@ -40,7 +40,7 @@ public:
           init_timer_->cancel();
           this->init_solver(); // safe shared_from_this() here
         });
-    smooth_alpha_ = this->declare_parameter<double>("smooth_alpha", 0.2); // 0..1
+    max_dq = this->declare_parameter<double>("max_dq", 0.1);
   }
 
 private:
@@ -168,8 +168,6 @@ private:
     out.name = joint_names_;
     out.position.resize(result.rows());
 
-    const double a = std::min(std::max(smooth_alpha_, 0.0), 1.0);
-
     if (!have_last_cmd_)
     {
       // First solution: take it as-is
@@ -199,12 +197,12 @@ private:
       {
         // “slerp-like” on a circle: shortest wrap-around interpolation
         const double d = shortest_angular_delta(prev, tgt);
-        cmd = prev + a * d;
+        cmd = prev + std::min(std::max(-max_dq, d), max_dq);
       }
       else
       {
         // plain lerp
-        cmd = prev + a * (tgt - prev);
+        cmd = prev + std::min(std::max(-max_dq, tgt - prev), max_dq);
         cmd = clamp_to_limits(i, cmd);
       }
 
@@ -258,7 +256,7 @@ private:
   // constructor utils:
   rclcpp::TimerBase::SharedPtr init_timer_;
 
-  double smooth_alpha_{0.2};
+  double max_dq{0.1};
   bool have_last_cmd_{false};
   std::vector<double> last_cmd_;
   std::vector<bool> is_continuous_;
