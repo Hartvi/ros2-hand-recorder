@@ -49,7 +49,7 @@ class HandPointsNode(Node):
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
             max_num_hands=config.NUM_HANDS_PER_SRC,
-            model_complexity=0,  # lighter model higher => better & slower
+            model_complexity=0,  # lighter model; higher => better & slower
             min_detection_confidence=0.6,
             min_tracking_confidence=0.5,
         )

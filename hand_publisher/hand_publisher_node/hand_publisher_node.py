@@ -51,7 +51,7 @@ class HandPublisherNode(Node):
         # self.get_logger().info('Hand points: "%s"' % str(dist))
 
         # Publish visualization marker in base_frame
-        low_pass_points = self.lerp(0.2, hand_points, self.old_points)
+        low_pass_points = self.lerp(0.5, hand_points, self.old_points)
         # self.get_logger().info(
         #     "thumb & index dist: %f"
         #     % np.linalg.norm(low_pass_points[8] - low_pass_points[4])

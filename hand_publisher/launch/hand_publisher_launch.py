@@ -72,12 +72,10 @@ def generate_launch_description():
                         "tip_link": cfg["tip_link"],
                         "timeout": 0.02,
                         "eps": 1e-5,
-                        # IMPORTANT: parameters are per-node, so set robot_description here too
                         "robot_description": urdf_xml,
                     }
                 ],
             ),
-            # --- Your hand_publisher nodes (added back) ---
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
@@ -115,8 +113,6 @@ def generate_launch_description():
                 parameters=[
                     {
                         "base_link": cfg["base_link"],
-                        # If your controller also needs tip_link, you can pass it too:
-                        # "tip_link": cfg["tip_link"],
                     }
                 ],
             ),

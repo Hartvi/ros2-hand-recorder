@@ -29,7 +29,10 @@ def hand_to_rot(hand_points: np.ndarray) -> R:
     _up /= np.linalg.norm(_up)
     # assuming camera is looking upwards
     # TODO: set the camera transform to some position looking from the side
-    return R.from_matrix(np.vstack([_up, -_forward, _orthogonal_side_vec]).T)
+    try:
+        return R.from_matrix(np.vstack([_up, -_forward, _orthogonal_side_vec]).T)
+    except:
+        return R.from_matrix(np.eye(3))
 
 
 def hand_to_pose(hand_points: np.ndarray) -> tuple[R, np.ndarray]:

@@ -1,6 +1,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <chrono>
+#include <cmath>
+#include <algorithm>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -37,6 +40,7 @@ public:
           init_timer_->cancel();
           this->init_solver(); // safe shared_from_this() here
         });
+    smooth_alpha_ = this->declare_parameter<double>("smooth_alpha", 0.2); // 0..1
   }
 
 private:
@@ -112,10 +116,26 @@ private:
       return;
     }
 
+    is_continuous_.assign(chain_.getNrOfJoints(), false);
+    for (unsigned i = 0; i < chain_.getNrOfJoints(); ++i)
+    {
+      const double lo = lower_(i);
+      const double hi = upper_(i);
+      const double span = hi - lo;
+      // Heuristic: treat as continuous if span is ~2π or limits look unbounded
+      if (!std::isfinite(lo) || !std::isfinite(hi) || span >= (2.0 * M_PI - 1e-3) || span > 1e6)
+      {
+        is_continuous_[i] = true;
+      }
+    }
+    have_last_cmd_ = false;
+    last_cmd_.clear();
+
     RCLCPP_INFO(get_logger(),
                 "TRAC-IK initialized: joints=%u (base=%s tip=%s)",
                 chain_.getNrOfJoints(), base_link_.c_str(), tip_link_.c_str());
   }
+
   void on_target_pose(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
   {
     if (!ik_)
@@ -147,12 +167,76 @@ private:
     out.header.stamp = now();
     out.name = joint_names_;
     out.position.resize(result.rows());
+
+    const double a = std::min(std::max(smooth_alpha_, 0.0), 1.0);
+
+    if (!have_last_cmd_)
+    {
+      // First solution: take it as-is
+      last_cmd_.resize(result.rows());
+      for (unsigned i = 0; i < result.rows(); ++i)
+      {
+        double v = result(i);
+        if (!is_continuous_[i])
+          v = clamp_to_limits(i, v);
+        out.position[i] = v;
+        last_cmd_[i] = v;
+        seed_(i) = v;
+      }
+      have_last_cmd_ = true;
+      sol_pub_->publish(out);
+      return;
+    }
+
+    // Smooth toward new solution
     for (unsigned i = 0; i < result.rows(); ++i)
     {
-      out.position[i] = result(i);
-      seed_(i) = result(i); // reuse as next seed for smoother solving
+      const double prev = last_cmd_[i];
+      const double tgt = result(i);
+
+      double cmd;
+      if (is_continuous_[i])
+      {
+        // “slerp-like” on a circle: shortest wrap-around interpolation
+        const double d = shortest_angular_delta(prev, tgt);
+        cmd = prev + a * d;
+      }
+      else
+      {
+        // plain lerp
+        cmd = prev + a * (tgt - prev);
+        cmd = clamp_to_limits(i, cmd);
+      }
+
+      out.position[i] = cmd;
+      last_cmd_[i] = cmd;
+      seed_(i) = cmd; // important: seed next IK with the smoothed command
     }
+
     sol_pub_->publish(out);
+  }
+
+  static double shortest_angular_delta(double from, double to)
+  {
+    // returns delta in [-pi, +pi]
+    double d = std::fmod((to - from) + M_PI, 2.0 * M_PI);
+    if (d < 0)
+      d += 2.0 * M_PI;
+    return d - M_PI;
+  }
+
+  double clamp_to_limits(unsigned i, double v) const
+  {
+    if (i < lower_.rows() && i < upper_.rows())
+    {
+      const double lo = lower_(i);
+      const double hi = upper_(i);
+      if (std::isfinite(lo) && std::isfinite(hi) && lo <= hi)
+      {
+        v = std::min(std::max(v, lo), hi);
+      }
+    }
+    return v;
   }
 
 private:
@@ -173,6 +257,11 @@ private:
 
   // constructor utils:
   rclcpp::TimerBase::SharedPtr init_timer_;
+
+  double smooth_alpha_{0.2};
+  bool have_last_cmd_{false};
+  std::vector<double> last_cmd_;
+  std::vector<bool> is_continuous_;
 };
 
 int main(int argc, char **argv)
