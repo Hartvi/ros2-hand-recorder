@@ -78,21 +78,15 @@ class HandPublisherNode(Node):
         def segment_dist(x: np.ndarray):
             return np.mean(np.sqrt(np.sum(np.diff(x, axis=0) ** 2, axis=1)))
 
-        thumb_dists = segment_dist(xyz[1:5, 0:2])
-        index_dists = segment_dist(xyz[5:9, 0:2])
-        middle_dists = segment_dist(xyz[9:13, 0:2])
-        ring_dists = segment_dist(xyz[13:17, 0:2])
-        pinky_dists = segment_dist(xyz[17:21, 0:2])
+        thumb_dists = segment_dist(xyz[[0, 5], 0:2])
+        index_dists = segment_dist(xyz[[0, 9], 0:2])
+        middle_dists = segment_dist(xyz[[0, 13], 0:2])
+        ring_dists = segment_dist(xyz[[0, 17], 0:2])
         return (
             config.TOTAL_SCALE
             * (
                 config.MAX_HAND_SIZE
-                / (
-                    scale
-                    * max(
-                        thumb_dists, index_dists, middle_dists, ring_dists, pinky_dists
-                    )
-                )
+                / (scale * max(thumb_dists, index_dists, middle_dists, ring_dists))
             )
             ** config.DIST_EXPONENT
         )
