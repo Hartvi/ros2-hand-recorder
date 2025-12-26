@@ -12,3 +12,4 @@ To launch rviz2:
 - inverse kinematics on robot arm from pose or just position
 - save data
 - create data set scene
+
