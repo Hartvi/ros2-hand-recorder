@@ -1,4 +1,13 @@
-## kinect from wish
+## human hand => robotic hand
+![Demo](media/hand_follow_viz.gif)
+
+What's going on:
+- `hand_image_node` - use opencv2 to capture webcam footage in 1280x720
+- `hand_points_node` - subscribe to the image published in the above node and plug the feed into mediapipe hand landmark detection 
+- `hand_publisher_node` - subscribe to aforementioned landmarks and publish 3D estimate of the points
+- `hand_frame_node` - extract transform from the 3D estimate of the points and publish the transform w.r.t. the camera frame that is also defined in this node
+- `controller_node` - take the hand transform and publish a `PoseStamped` for inverse kinematics
+- `trac_ik_node` - use the `trac_ik` package to perform inverse kinematics every time the hand pose is published and publish state joints
 
 
 To launch rviz2:
@@ -21,28 +30,7 @@ To launch rviz2:
 - visualize robotics arm URDFs
 - inverse kinematics on robot arm from pose or just position
 
-diagnose meshes:
-```
-ros2 topic pub --once /mesh_test visualization_msgs/msg/Marker "{
-  header: {frame_id: base_link},
-  ns: 'mesh_test',
-  id: 0,
-  type: 10,
-  action: 0,
-  pose: {orientation: {w: 1.0}},
-  scale: {x: 1.0, y: 1.0, z: 1.0},
-  color: {r: 0.8, g: 0.8, b: 0.8, a: 1.0},
-  mesh_resource: 'package://hand_publisher/urdf/gen3_7dof/meshes/forearm_link.stl'
-}"
-```
-
-
-just IK:
+Requirements:
 `sudo apt install ros-${ROS_DISTRO}-trac-ik`
 
 
-moveit:
-`sudo apt install ros-${ROS_DISTRO}-moveit`
-`ros2 interface show moveit_msgs/srv/GetPositionIK`
-python bindings:
-`sudo apt install ros-jazzy-moveit-py`
