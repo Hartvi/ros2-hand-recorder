@@ -12,7 +12,6 @@ from geometry_msgs.msg import Point
 from tf2_ros import TransformException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-from scipy.spatial.transform import Rotation as R
 
 
 class HandPublisherNode(Node):
@@ -34,6 +33,7 @@ class HandPublisherNode(Node):
 
         # Publisher for RViz markers
         self.marker_pub = self.create_publisher(Marker, "hand_points_marker", 10)
+        self.finger_pos = self.create_publisher(Point, "finger_dist", 10)
         self.corrected_point_pub = self.create_publisher(
             HandPoints, "hand_points_corrected", 10
         )
@@ -112,7 +112,7 @@ class HandPublisherNode(Node):
 
     def publish_marker(self, hand_points: np.ndarray):
         marker = Marker()
-        marker.header.frame_id = self.base_frame
+        marker.header.frame_id = "camera_frame"
         marker.header.stamp = self.get_clock().now().to_msg()
 
         marker.ns = "hand_points"
@@ -134,26 +134,13 @@ class HandPublisherNode(Node):
         marker.color.g = 1.0
         marker.color.b = 0.0
 
-        transform = self.lookup_transform()
-        if transform:
-            translation = transform.transform.translation
-            rotation = transform.transform.rotation
-            # self.get_logger().info('translation: "%s"' % str(translation))
-            # self.get_logger().info('rotation: "%s"' % str(rotation))
-            rot = R.from_quat(
-                [rotation.x, rotation.y, rotation.z, rotation.w]
-            ).as_matrix()
-            # Add all 21 points
-            hand_points = (rot @ hand_points.T).T + np.array(
-                [translation.x, translation.y, translation.z]
-            )
-            for p in hand_points:
-                pt = Point()
-                pt.x = float(p[0])
-                pt.y = float(p[1])
-                pt.z = float(p[2])
-                marker.points.append(pt)
-            self.marker_pub.publish(marker)
+        for p in hand_points:
+            pt = Point()
+            pt.x = float(p[0])
+            pt.y = float(p[1])
+            pt.z = float(p[2])
+            marker.points.append(pt)
+        self.marker_pub.publish(marker)
 
 
 def main(args=None):

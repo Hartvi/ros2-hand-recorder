@@ -2,6 +2,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
+from launch.launch_context import LaunchContext
 from launch_ros.actions import Node
 from pathlib import Path
 
@@ -29,7 +30,7 @@ def generate_launch_description():
         },
     }
 
-    def launch_setup(context, *args, **kwargs):
+    def launch_setup(context: LaunchContext, *args, **kwargs):
         robot_name = LaunchConfiguration(ROBOT).perform(context)
         use_rviz_val = LaunchConfiguration(USE_RVIZ).perform(context).lower()
 
@@ -52,6 +53,7 @@ def generate_launch_description():
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
                 parameters=[{"robot_description": urdf_xml}],
+                remappings=[("joint_states", "/joint_states_merged")],
             ),
             # world -> base_link (static)
             Node(
@@ -115,6 +117,20 @@ def generate_launch_description():
                         "base_link": cfg["base_link"],
                     }
                 ],
+            ),
+            Node(
+                package="hand_publisher",
+                namespace="hand_publisher",
+                executable="joint_state_merger",
+                name="joint_state_merger",
+                prefix="/home/hartvi/miniconda3/bin/python",
+            ),
+            Node(
+                package="hand_publisher",
+                namespace="hand_publisher",
+                executable="gripper_publisher",
+                name="gripper_publisher",
+                prefix="/home/hartvi/miniconda3/bin/python",
             ),
         ]
 
