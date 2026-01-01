@@ -5,7 +5,7 @@ from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
 from hand_publisher_interfaces.msg import HandPoints
 
-from .hand_utils import hand_to_pose
+from .hand_utils import hand_to_pose, hand_fingers_to_pose
 from scipy.spatial.transform import Rotation as R
 
 
@@ -61,7 +61,10 @@ class HandFrameNode(Node):
         msg.child_frame_id = "hand_frame"
 
         # TODO: set depending on the URDF that is present
-        x, y, z, w = R.from_euler("XYZ", [np.pi / 2, 0, np.pi], degrees=False).as_quat()
+        # x, y, z, w = R.from_euler("XYZ", [np.pi / 2, 0, np.pi], degrees=False).as_quat()
+        x, y, z, w = R.from_euler(
+            "XYZ", [0, np.pi / 2, np.pi / 2], degrees=False
+        ).as_quat()
         msg.transform.translation.x = 0.0
         msg.transform.translation.y = 0.0
         msg.transform.translation.z = 0.0
@@ -80,7 +83,8 @@ class HandFrameNode(Node):
         msg.child_frame_id = "raw_hand_frame"
         # TODO: publish corrected hand_points here
 
-        R_rot, t = hand_to_pose(hand_points)
+        # R_rot, t = hand_to_pose(hand_points)
+        R_rot, t = hand_fingers_to_pose(hand_points)
         x, y, z, w = R_rot.as_quat()
 
         msg.transform.translation.x = float(t[0])

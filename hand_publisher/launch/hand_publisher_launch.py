@@ -27,6 +27,7 @@ def generate_launch_description():
             / "GEN3_URDF_V12.urdf",
             "base_link": "base_link",
             "tip_link": "end_effector_link",
+            # "tip_link": "left_inner_finger_pad",
         },
     }
 
@@ -153,7 +154,7 @@ def generate_launch_description():
                 USE_RVIZ, default_value="true", description="Whether to launch RViz"
             ),
             DeclareLaunchArgument(
-                ROBOT, default_value="panda", description="Robot config key"
+                ROBOT, default_value="kinova", description="Robot config key"
             ),
             OpaqueFunction(function=launch_setup),
         ]

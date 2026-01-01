@@ -52,10 +52,6 @@ class HandPublisherNode(Node):
 
         # Publish visualization marker in base_frame
         low_pass_points = self.lerp(0.5, hand_points, self.old_points)
-        # self.get_logger().info(
-        #     "thumb & index dist: %f"
-        #     % np.linalg.norm(low_pass_points[8] - low_pass_points[4])
-        # )
         hand_point_msg = HandPoints()
         hand_point_msg.points = low_pass_points.flat
         self.corrected_point_pub.publish(hand_point_msg)
