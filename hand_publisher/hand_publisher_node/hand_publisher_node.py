@@ -44,6 +44,18 @@ class HandPublisherNode(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
+        self.declare_parameter("max_hand_size", 18.5)
+        self.max_hand_size: float = self.get_parameter("max_hand_size").value
+
+        self.declare_parameter("dist_exponent", 1.145)
+        self.dist_exponent: float = self.get_parameter("dist_exponent").value
+
+        self.declare_parameter("total_scale", 0.035)
+        self.total_scale: float = self.get_parameter("total_scale").value
+
+        self.declare_parameter("scale", 10.0)
+        self.scale: float = self.get_parameter("scale").value
+
     def listener_callback(self, msg: HandPoints):
         hand_points = np.array(msg.points).reshape(21, 3, copy=False)
         dist = self.mix_in_distance(hand_points)
@@ -67,8 +79,7 @@ class HandPublisherNode(Node):
         points_21_3[:, :2] *= dist
         points_21_3[:, 2] += dist
 
-    @staticmethod
-    def mix_in_distance(xyz: np.ndarray, scale=10.0):
+    def mix_in_distance(self, xyz: np.ndarray):
         assert xyz.shape[0] == 21, f"{xyz=}"
 
         def segment_dist(x: np.ndarray):
@@ -79,12 +90,12 @@ class HandPublisherNode(Node):
         middle_dists = segment_dist(xyz[[0, 13], 0:2])
         ring_dists = segment_dist(xyz[[0, 17], 0:2])
         return (
-            config.TOTAL_SCALE
+            self.total_scale
             * (
-                config.MAX_HAND_SIZE
-                / (scale * max(thumb_dists, index_dists, middle_dists, ring_dists))
+                self.max_hand_size
+                / (self.scale * max(thumb_dists, index_dists, middle_dists, ring_dists))
             )
-            ** config.DIST_EXPONENT
+            ** self.dist_exponent
         )
 
     @staticmethod

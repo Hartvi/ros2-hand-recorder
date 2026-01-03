@@ -6,26 +6,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# TODO: split shared memory to have a region for each hand so each region can be written to and read from independently, so we don't have to use locks
-# when I move the hand to cover the whole screen, the largest distance is ~1.8 or so
-# so to have distance at camera position be == 0, we have to inverse the distance
-MAX_HAND_SIZE = 18.5
-NORMALIZATION_CONSTANT = 8
-DIST_EXPONENT = 1.145
-TOTAL_SCALE = 0.035
-
-MIXIN_DISTANCE = True
 USE_DROID = False
-DEBUG = True
-RECORD = True
-NUM_HANDS_PER_SRC = 1
 
 IMAGE_SIZE = (1280, 720)
 
-HAND_POINTS = 21
-NUM_FRAMES = 100
-HAND_DEBUG_POINTS = 100
-PUB_SUB_PATH = "vis_pos"
 CAMS = ()
 
 

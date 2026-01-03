@@ -45,7 +45,7 @@ class HandFrameNode(Node):
         x, y, z, w = R.from_euler(
             "XYZ", [0, np.pi / 2, -np.pi / 2], degrees=False
         ).as_quat()
-        msg.transform.translation.x = -0.6
+        msg.transform.translation.x = -1.0
         msg.transform.translation.y = 0.0
         msg.transform.translation.z = 0.4
         msg.transform.rotation.x = float(x)

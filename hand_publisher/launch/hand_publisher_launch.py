@@ -27,7 +27,19 @@ def generate_launch_description():
             / "GEN3_URDF_V12.urdf",
             "base_link": "base_link",
             "tip_link": "end_effector_link",
-            # "tip_link": "left_inner_finger_pad",
+            "gripper_finger1": "left_inner_finger_pad",
+            "gripper_finger2": "right_inner_finger_pad",
+            "joint_names": [
+                "finger_joint",
+                "left_inner_knuckle_joint",
+                "right_outer_knuckle_joint",
+                "right_inner_knuckle_joint",
+                "left_inner_finger_joint",
+                "right_inner_finger_joint",
+            ],
+            "joint_multipliers": [1.0, 1.0, 1.0, 1.0, -1.0, -1.0],
+            "q_scale": 10.0,
+            "q_max": 1.0,
         },
     }
 
@@ -132,6 +144,18 @@ def generate_launch_description():
                 executable="gripper_publisher",
                 name="gripper_publisher",
                 prefix="/home/hartvi/miniconda3/bin/python",
+                parameters=[
+                    (
+                        {
+                            "joint_names": cfg["joint_names"],
+                            "joint_multipliers": cfg["joint_multipliers"],
+                            "q_scale": cfg["q_scale"],
+                            "q_max": cfg["q_max"],
+                        }
+                        if cfg.get("joint_names")
+                        else []
+                    )
+                ],
             ),
         ]
 

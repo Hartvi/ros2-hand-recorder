@@ -3,7 +3,7 @@ import numpy as np
 import rclpy
 
 from . import config
-from hand_publisher_interfaces.msg import Image, HandPoints
+from hand_publisher_interfaces.msg import Image, HandPoints # type: ignore
 from rclpy.node import Node
 
 from typing import TYPE_CHECKING
@@ -45,10 +45,12 @@ class HandPointsNode(Node):
         )
         self.subscription  # prevent unused variable warning
         # INIT
+        self.declare_parameter("num_hands_per_src", 1)
+        self.num_hands_per_src: list[str] = self.get_parameter("num_hands_per_src").value  # type: ignore
         self.mp_hands = mediapipe.solutions.hands  # type: ignore
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
-            max_num_hands=config.NUM_HANDS_PER_SRC,
+            max_num_hands=self.num_hands_per_src,
             model_complexity=0,  # lighter model; higher => better & slower
             min_detection_confidence=0.6,
             min_tracking_confidence=0.5,

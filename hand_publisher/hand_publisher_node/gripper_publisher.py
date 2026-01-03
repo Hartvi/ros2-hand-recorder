@@ -6,65 +6,63 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
 
+from rclpy.parameter import Parameter
+
+
 class GripperPublisher(Node):
     def __init__(self):
         super().__init__("gripper_publisher")
+
         self.pub = self.create_publisher(JointState, "/gripper_joint_states", 10)
         self.sub = self.create_subscription(
             HandPoints, "hand_points_corrected", self.grip, 10
         )
-        # TODO: process handpoints into a gripper position
-        self.q = 0.0  # finger_joint angle (rad)
+
+        # Parameters
+        # robotiq 2f 85 defaults
+        self.declare_parameter(
+            "joint_names",
+            [
+                "finger_joint",
+                "left_inner_knuckle_joint",
+                "right_outer_knuckle_joint",
+                "right_inner_knuckle_joint",
+                "left_inner_finger_joint",
+                "right_inner_finger_joint",
+            ],
+        )
+        self.declare_parameter("joint_multipliers", [1.0, 1.0, 1.0, 1.0, -1.0, -1.0])
+        self.declare_parameter("q_scale", 10.0)
+        self.declare_parameter("q_max", 1.0)
+
+        self.joint_names: list[str] = self.get_parameter("joint_names").value
+        self.joint_multipliers: list[float] = self.get_parameter(
+            "joint_multipliers"
+        ).value
+        self.q_scale: float = float(self.get_parameter("q_scale").value)
+        self.q_max = float(self.get_parameter("q_max").value)
+
+        if len(self.joint_names) != len(self.joint_multipliers):
+            raise ValueError("joint_names and joint_multipliers must have same length")
+
+        self.q = 0.0
 
     def grip(self, msg: HandPoints):
-
-        hand_points = np.array(msg.points).reshape(21, 3, copy=False)
+        hand_points = np.array(msg.points).reshape(21, 3)
         dist = np.linalg.norm(hand_points[4] - hand_points[8])
-        self.q = max(0, min(1, float(1 - 10 * dist)))
-        # self.get_logger().info('Hand points: "%s"' % str(self.q))
+
+        q = 1.0 - self.q_scale * float(dist)
+        self.q = float(np.clip(q, 0.0, self.q_max))
         self.publish()
 
     def publish(self):
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
 
-        # TODO: get this as parameters
-        msg.name = [
-            "finger_joint",
-            "left_inner_knuckle_joint",
-            "right_outer_knuckle_joint",
-            "right_inner_knuckle_joint",
-            "left_inner_finger_joint",
-            "right_inner_finger_joint",
-        ]
-
-        msg.position = [
-            self.q,  # finger_joint
-            self.q,  # +1 mimic
-            self.q,  # +1 mimic
-            self.q,  # +1 mimic
-            -self.q,  # -1 mimic
-            -self.q,  # -1 mimic
-        ]
+        msg.name = list(self.joint_names)
+        msg.position = [m * self.q for m in self.joint_multipliers]
 
         self.pub.publish(msg)
-
-    def link_positions(self):
-        link_names = ["left_inner_finger_pad", "right_inner_finger_pad"]
-        """
-        ee transform
-        =>
-        left pad
-        right pad
-        diff vec 1 = finger point 1 - left pad.position
-        diff vec 2 = finger point 2 - right pad.position
-        diff vec = 0.5 * (diff vec 1 + diff vec 2)
-
-        PROPOSAL 2:
-        ik on left finger + rotation to match the other finger
-        set the rotation to match the other finger
-
-        """
 
 
 def main():
