@@ -2,7 +2,6 @@
 
 
 ### TODOs
-- create parameter for base to finger distance for each config
 - add gazebo/newer gazebo(fusion?) simulation
 - save data
 - create data set scene
@@ -10,6 +9,7 @@
 
 
 ### DONE
+- create parameter for base to finger distance for each config
 - connect gripper urdf to robot urdf
 - smooth out movements
 - fix hand transform to correspond to the correct rotation
