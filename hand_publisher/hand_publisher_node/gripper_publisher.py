@@ -51,7 +51,6 @@ class GripperPublisher(Node):
         hand_points = np.array(msg.points).reshape(21, 3)
         dist = np.linalg.norm(hand_points[4] - hand_points[8])
 
-        self.get_logger().info(f"dist: {dist}")
         # to limit the noise => closed & open state are further apart with the second power
         q = 1.0 - self.q_scale**2 * float(dist**2)
         self.q = float(np.clip(q, 0.0, self.q_max))
