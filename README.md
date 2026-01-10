@@ -15,17 +15,18 @@ What's going on:
 - `gripper_publisher` - takes in hand points and determines whether the gripper should be open or closed
 
 ## How to launch
-./utils build - build the project
-./utils run - run the project
-./utils clean - remove the log & install & build directories (sometimes needed when build fails)
-./utils clean build run - all of the above
-./utils run robot:=panda - run with panda robot instead of kinova (no gripper atm)
+- ./utils build - build the project
+- ./utils run - run the project
+- ./utils clean - remove the log & install & build directories (sometimes needed when build fails)
+- ./utils clean build run - all of the above
+- ./utils run robot:=panda - run with panda robot instead of kinova (no gripper atm)
 
-To launch rviz2:
-`unset GTK_PATH`
-`ros2 run rviz2 rviz2`
+To launch rviz2 independently (on my machine):
+- `unset GTK_PATH`
+- `ros2 run rviz2 rviz2`
 
 Requirements:
-`sudo apt install ros-${ROS_DISTRO}-trac-ik`
-
+- ROS2 Jazzy
+- `sudo apt install ros-${ROS_DISTRO}-trac-ik`
+- mediapipe
 
