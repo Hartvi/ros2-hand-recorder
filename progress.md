@@ -17,3 +17,4 @@
 - get position and dir from hand points
 - visualize robotics arm URDFs
 - inverse kinematics on robot arm from pose or just position
+

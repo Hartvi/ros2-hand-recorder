@@ -1,6 +1,9 @@
 ## human hand => robotic hand
 ![Demo](media/hand_follow_viz.gif)
 
+
+![Hand alignment](media/kinova_gripper.gif)
+
 What's going on:
 - `hand_image_node` - use opencv2 to capture webcam footage in 1280x720
 - `hand_points_node` - subscribe to the image published in the above node and plug the feed into mediapipe hand landmark detection
@@ -16,7 +19,7 @@ What's going on:
 ./utils run - run the project
 ./utils clean - remove the log & install & build directories (sometimes needed when build fails)
 ./utils clean build run - all of the above
-./utils run robot:=kinova
+./utils run robot:=panda - run with panda robot instead of kinova (no gripper atm)
 
 To launch rviz2:
 `unset GTK_PATH`
