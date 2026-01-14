@@ -26,7 +26,8 @@ To launch rviz2 independently (at least on my machine):
 - `ros2 run rviz2 rviz2`
 
 Requirements:
+- Python 3.12.3
 - ROS2 Jazzy
 - `sudo apt install ros-${ROS_DISTRO}-trac-ik`
-- mediapipe
+- requirements.txt
 
