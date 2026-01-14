@@ -1,4 +1,4 @@
-## human hand => robotic hand
+## ROS2 hand teleoperation from webcam
 ![Demo](media/hand_follow_viz.gif)
 
 
@@ -21,7 +21,7 @@ What's going on:
 - ./utils clean build run - all of the above
 - ./utils run robot:=panda - run with panda robot instead of kinova (no gripper atm)
 
-To launch rviz2 independently (on my machine):
+To launch rviz2 independently (at least on my machine):
 - `unset GTK_PATH`
 - `ros2 run rviz2 rviz2`
 
