@@ -57,7 +57,7 @@ class HandPublisherNode(Node):
         self.scale: float = self.get_parameter("scale").value
 
     def listener_callback(self, msg: HandPoints):
-        hand_points = np.array(msg.points).reshape(21, 3, copy=False)
+        hand_points = np.array(msg.points).reshape(21, 3)
         dist = self.mix_in_distance(hand_points)
         self.normalize_hand(hand_points, dist)
         # self.get_logger().info('Hand points: "%s"' % str(dist))

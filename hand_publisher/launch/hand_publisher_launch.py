@@ -96,35 +96,35 @@ def generate_launch_description():
                 namespace="hand_publisher",
                 executable="hand_image_node",
                 name="hand_image",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
             ),
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
                 executable="hand_points_node",
                 name="hand_points",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
             ),
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
                 executable="hand_publisher_node",
                 name="hand_marker",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
             ),
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
                 executable="hand_frame_node",
                 name="hand_frame",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
             ),
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
                 executable="controller_node",
                 name="controller",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
                 parameters=[
                     {
                         "base_link": cfg["base_link"],
@@ -136,14 +136,14 @@ def generate_launch_description():
                 namespace="hand_publisher",
                 executable="joint_state_merger",
                 name="joint_state_merger",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
             ),
             Node(
                 package="hand_publisher",
                 namespace="hand_publisher",
                 executable="gripper_publisher",
                 name="gripper_publisher",
-                prefix="/home/hartvi/miniconda3/bin/python",
+                # prefix="/home/hartvi/miniconda3/bin/python",
                 parameters=[
                     (
                         {
