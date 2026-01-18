@@ -59,7 +59,7 @@ TL;DR: Webcam => MediaPipe landmarks => 3D hand pose => TF => IK => robot joint 
 /tf_static
 ```
 
-### Launching rviz2 independently (at least on my machine):
+### Launching rviz2 independently
 - `unset GTK_PATH`
 - `ros2 run rviz2 rviz2`
 
@@ -69,3 +69,4 @@ TL;DR: Webcam => MediaPipe landmarks => 3D hand pose => TF => IK => robot joint 
 - source better urdf/xacro representations
 - integrating physics with Gazebo or other
 - make hand teleoperate a an action server
+- rewrite in CPP to speed things up
