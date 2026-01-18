@@ -17,11 +17,11 @@ TL;DR: Webcam => MediaPipe landmarks => 3D hand pose => TF => IK => robot joint 
 - `gripper_publisher` - takes in hand points and determines whether the gripper should be open or closed
 
 ## How to launch
-- ./utils.py build - build the project
-- ./utils.py run - run the project
-- ./utils.py clean - remove the log & install & build directories (sometimes needed when build fails)
-- ./utils.py clean build run - all of the above
-- ./utils.py run robot:=panda - run with panda robot instead of kinova (no gripper atm)
+- python utils.py build - build the project
+- python utils.py run - run the project
+- python utils.py clean - remove the log & install & build directories (sometimes needed when build fails)
+- python utils.py clean build run - all of the above
+- python utils.py run robot:=panda - run with panda robot instead of kinova (no gripper atm)
 
 ### Requirements:
 - Tested on Ubuntu 24.04, Python 3.12.3, ROS2 Jazzy, acer nitro laptop
